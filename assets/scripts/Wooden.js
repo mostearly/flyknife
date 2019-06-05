@@ -119,7 +119,6 @@ cc.Class({
   },
   onCollisionEnter(self){
     // console.log("木头：有人碰到我了，要是以前它早挂了，现在我允许它插在我身上");
-    self.node.destroy();
     this.addMark();
     this.woodenAnim();
     this.node.parent.getComponent("Game").gainScore();

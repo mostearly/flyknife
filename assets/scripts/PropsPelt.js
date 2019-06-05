@@ -33,7 +33,6 @@ cc.Class({
         parent.isPelt = false;
         this.node.destroy();
         parent.newPelt();
-        parent.allow = true;
         break;
       case "knife":
         parent.isPelt = false;

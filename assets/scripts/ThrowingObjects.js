@@ -58,9 +58,12 @@ cc.Class({
     this.count--;
     this.countLabel.string = this.total-this.count-1+" / "+this.total; // 为何因此计算是因为count是--的
     if(this.count<0){
-      this.node.parent.getComponent("Game").transition();
+      setTimeout(()=>{
+        this.node.parent.getComponent("Game").transition();
+      },1);
       return;
     }
+    this.allow = true;
     this.pelt = cc.instantiate(this.peltPrefab);
     this.pelt.group = "pelt";
     this.pelt.setPosition(0,0);

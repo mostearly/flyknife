@@ -92,60 +92,74 @@ cc.Class({
   transition(){
     this.wooden.stopAllActions();
     // 销毁 背景
+    // 初始化，无法计算动画加上运行期大概多少时间便使用定时器
+    let readyInit = (()=>{
+      let time = null;
+      return()=>{
+        clearTimeout(time);
+        time=setTimeout(this.init.bind(this),1000);
+      }
+    })();
     this.wooden.getChildByName('woodenBackground').destroy();
     // 取得所有参与到动画的所有节点
     let masks = this.wooden.getChildByName('mask');
     let knife = this.wooden.getChildByName('knifes').children;
     let apple = this.wooden.getChildByName('apples').children;
-    this.wooden.setRotation(0);
     let angle = Math.floor(this.wooden.rotation%360);
     let mask = masks.children;
     masks.active = true;
     let rd = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
-    let animation = (arr)=>{
-      for (let i =0;i<arr.length;i++){
-        let temp = arr[i];
-        let tempAngle = angle+90;
-        tempAngle = tempAngle<360?tempAngle:360-tempAngle;
+    let animation = ()=>{
+      for (let i =0;i<mask.length;i++){
+        let temp = mask[i];
+        let tempAngle = 0-angle;
+        tempAngle = tempAngle>0?tempAngle:360+tempAngle;
         let x,y;
-        let randonAngle= Math.random()*360;
-        let down = null;
-        if(tempAngle%180===0){
-          x = 120*Math.sin(Math.PI/180*(tempAngle+randonAngle))*Math.random();
-          y = rd(100,-100)*Math.cos(Math.PI/180*tempAngle);
-          down = cc.moveTo(2,cc.p(-cc.winSize.height,x))
-        }else{
-          x = rd(100,-100)*Math.cos(Math.PI/180*tempAngle);
-          y = 120*Math.sin(Math.PI/180**(tempAngle+randonAngle))*Math.random();
-          down = cc.moveTo(2,cc.p(y,-cc.winSize.height))
-        }
-        let p=arr.length/4;
-        // 顺时针重设中心点
-        if(i>=0&&i<p){
-          temp.anchorX = 0.75;
-          temp.anchorY = 0.25;
-        }else if(i>=p&&p+p){
-          temp.anchorX = 0.25;
-          temp.anchorY = 0.25;
-        }else if(i>=2*p&&i<3*p){
-          temp.anchorX = 0.25;
-          temp.anchorY = 0.75;
-        }else{
-          temp.anchorX = 0.75;
-          temp.anchorY = 0.75;
-        }
-        let up = cc.moveTo(.1,cc.p(x,y)).easing(cc.easeCubicActionOut());
-        let rotate = cc.rotateBy(4,360);
+        x = temp.x+rd(180,240)*Math.sin(Math.PI/180*tempAngle)*Math.random();
+        y = temp.y+rd(180,240)*Math.cos(Math.PI/180*tempAngle)*Math.random();
+        console.log(x,y);
+        let up = cc.moveTo(.2,cc.p(x,y));
+        let down = cc.moveBy(rd(.8,1.2),cc.p(-cc.winSize.height*Math.sin(Math.PI/180*tempAngle),-cc.winSize.height*Math.cos(Math.PI/180*tempAngle)));
+        // let rotate = cc.rotateBy(4,360);
         let callback = cc.callFunc(()=>{
           temp.destroy();
           console.log("已销毁");
+          readyInit();
         });
-        temp.runAction(cc.sequence(up,down));
+        temp.runAction(cc.sequence(up,down,callback));
+        // temp.runAction(cc.repeatForever(rotate))
+      }
+      for (let i =0;i<knife.length;i++){
+        let temp = knife[i];
+        let tempAngle = 0-angle;
+        tempAngle = tempAngle>0?tempAngle:360+tempAngle;
+        let up = cc.moveTo(.2,cc.p(temp.x+120*Math.sin(Math.PI/180*tempAngle)*Math.random(),temp.y+120*Math.cos(Math.PI/180*tempAngle)*Math.random()));
+        let down = cc.moveBy(rd(1.0,1.6),cc.p(-cc.winSize.height*Math.sin(Math.PI/180*tempAngle),-cc.winSize.height*Math.cos(Math.PI/180*tempAngle)));
+        let callback = cc.callFunc(()=>{
+          temp.destroy();
+          console.log("已销毁");
+          readyInit();
+        });
+        let rotate = cc.rotateBy(2,360);
+        temp.runAction(cc.sequence(up,down,callback));
+        temp.runAction(cc.repeatForever(rotate))
+      }
+      for (let i =0;i<apple.length;i++){
+        let temp = apple[i];
+        let tempAngle = 0-angle;
+        tempAngle = tempAngle>0?tempAngle:360+tempAngle;
+        let up = cc.moveTo(.2,cc.p(temp.x+120*Math.sin(Math.PI/180*tempAngle)*Math.random(),temp.y+120*Math.cos(Math.PI/180*tempAngle)*Math.random()));
+        let down = cc.moveBy(rd(1.0,1.4),cc.p(-cc.winSize.height*Math.sin(Math.PI/180*tempAngle),-cc.winSize.height*Math.cos(Math.PI/180*tempAngle)));
+        let callback = cc.callFunc(()=>{
+          temp.destroy();
+          readyInit();
+        });
+        let rotate = cc.rotateBy(2,360);
+        temp.runAction(cc.sequence(up,down,callback));
         temp.runAction(cc.repeatForever(rotate))
       }
     };
-    animation(mask);
-    // this.init();
+    animation();
   },
   gameover(){
     this.gameOverNode.active = true;
